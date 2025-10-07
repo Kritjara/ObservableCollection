@@ -124,7 +124,11 @@ public class ReadOnlyObservableCollection<T> : IReadOnlyObservableCollection<T>,
 
     int IList.IndexOf(object? value)
     {
-        throw new NotImplementedException();
+        if (value is null || !value.GetType().IsAssignableFrom(typeof(T)))
+        {
+            return -1;
+        }
+        return Source.IndexOf((T)value);
     }
 
     void IList.Insert(int index, object? value)

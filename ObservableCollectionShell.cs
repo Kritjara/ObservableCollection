@@ -115,11 +115,6 @@ internal class ObservableCollectionShell<T> : IObservableCollection<T>, IList
         }
     }
 
-    public void CopyTo(int index, T[] array, int arrayIndex, int count)
-    {
-        throw new NotImplementedException();
-    }
-
     #region [ IList ]
 
 
