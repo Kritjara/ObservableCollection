@@ -20,7 +20,7 @@ public interface IReadOnlyObservableCollection<out T> : IReadOnlyList<T>, INotif
 
     /// <summary>Создаёт коллецию только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
-    static IReadOnlyObservableCollection<T> Create(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source) => new ReadOnlyObservableCollectionShell<T>(source);
+    static IReadOnlyObservableCollection<T> Create(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source) => new ReadOnlyObservableCollection<T>(source);
 
     /// <summary>Создаёт коллецию только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>

@@ -1,35 +1,88 @@
-﻿using System.Collections;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Kritjara.Collections.ObjectModel;
 
 /// <inheritdoc cref="IReadOnlyObservableCollection{T}"/>
-public class ReadOnlyObservableCollection<T> : IReadOnlyObservableCollection<T>, IList<T>, IList
+public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>
 {
-    /// <summary>Основной источник элементов</summary>
-    internal readonly IList<T> Source;
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
-    public ReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source)
+    public ReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source) : base(source)
     {
-        Source = source;
-        ((INotifyCollectionChanged)Source).CollectionChanged += Source_CollectionChanged;
-        ((INotifyPropertyChanged)Source).PropertyChanged += Source_PropertyChanged;
+        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
     }
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
-    public ReadOnlyObservableCollection(IObservableCollection<T> source)
+    public ReadOnlyObservableCollection(IObservableCollection<T> source) : base(source)
     {
-        Source = source;
-        ((INotifyCollectionChanged)Source).CollectionChanged += Source_CollectionChanged;
-        ((INotifyPropertyChanged)Source).PropertyChanged += Source_PropertyChanged;
+        source.CollectionChanged += Source_CollectionChanged;
+        source.PropertyChanged += Source_PropertyChanged;
     }
 
+    /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
+    /// <param name="source">Основной источник элементов.</param>
+    public ReadOnlyObservableCollection(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source) : base(source)
+    {
+        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
+    }
+
+    /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
+    /// <param name="source">Основной источник элементов.</param>
+    private ReadOnlyObservableCollection(IList<T> source) : base(source)
+    {
+        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
+    }
+
+    /// <summary>Пытается создать коллекцию только для чтения из объекта типа <see cref="INotifyCollectionChanged"/></summary>
+    /// <param name="source">Коллекция с уведомлениями</param>
+    /// <param name="result">Результат успешной операции в виде <see cref="ReadOnlyObservableCollection{T}"/></param>
+    /// <remarks>Создание будет успешным, если <paramref name="source"/> реализует <see cref="IList{T}"/></remarks>
+    public static bool TryCreate(INotifyCollectionChanged source, [NotNullWhen(true)] out ReadOnlyObservableCollection<T>? result)
+    {
+        if (source is ReadOnlyObservableCollection<T> asReadOnly)
+        {
+            result = asReadOnly;
+            return true;
+        }
+
+        if (source is IList<T> asList)
+        {
+            result = new ReadOnlyObservableCollection<T>(asList);
+            return true;
+        }
+
+        result = null;
+        return false;
+    }
+
+    /// <summary>Пытается создать коллекцию только для чтения из объекта типа <see cref="IList{T}"/></summary>
+    /// <param name="source">Коллекция с уведомлениями</param>
+    /// <param name="result">Результат успешной операции в виде <see cref="ReadOnlyObservableCollection{T}"/></param>
+    /// <remarks>Создание будет успешным, если <paramref name="source"/> реализует <see cref="INotifyCollectionChanged"/></remarks>
+    public static bool TryCreate(IList<T> source, [NotNullWhen(true)] out ReadOnlyObservableCollection<T>? result)
+    {
+        if (source is ReadOnlyObservableCollection<T> asReadOnly)
+        {
+            result = asReadOnly;
+            return true;
+        }
+
+        if (source is INotifyCollectionChanged)
+        {
+            result = new ReadOnlyObservableCollection<T>(source);
+            return true;
+        }
+
+        result = null;
+        return false;
+    }
 
     /// <inheritdoc/>
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
@@ -46,161 +99,6 @@ public class ReadOnlyObservableCollection<T> : IReadOnlyObservableCollection<T>,
     private void Source_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         PropertyChanged?.Invoke(this, e);
-    }
-
-
-    /// <inheritdoc/>
-    public T this[int index] => Source[index];
-
-    /// <inheritdoc/>
-    public int Count => Source.Count;
-
-    /// <inheritdoc/>
-    public IEnumerator<T> GetEnumerator() => Source.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => Source.GetEnumerator();
-
-
-
-    #region [ IList<T> ]
-
-    int IList<T>.IndexOf(T item) => Source.IndexOf(item);
-
-    void IList<T>.Insert(int index, T item) => ThrowNotSupportedException();
-
-    void IList<T>.RemoveAt(int index) => ThrowNotSupportedException();
-
-    T IList<T>.this[int index]
-    {
-        get => Source[index];
-        set
-        {
-            ThrowNotSupportedException();
-        }
-    }
-
-    void ICollection<T>.Add(T item) => ThrowNotSupportedException();
-
-    void ICollection<T>.Clear() => ThrowNotSupportedException();
-
-    bool ICollection<T>.Contains(T item) => Source.Contains(item);
-
-    void ICollection<T>.CopyTo(T[] array, int arrayIndex) => Source.CopyTo(array, arrayIndex);
-
-    bool ICollection<T>.Remove(T item)
-    {
-        ThrowNotSupportedException();
-        return false;
-    }
-
-    int ICollection<T>.Count => Source.Count;
-    bool ICollection<T>.IsReadOnly => true;
-
-    IEnumerator<T> IEnumerable<T>.GetEnumerator() => Source.GetEnumerator(); 
-
-    #endregion
-
-    #region [ IList ]
-
-    int IList.Add(object? value)
-    {
-        ThrowNotSupportedException();
-        return -1;
-    }
-
-    void IList.Clear()
-    {
-        ThrowNotSupportedException();
-    }
-
-    bool IList.Contains(object? value)
-    {
-        if (value is null || !value.GetType().IsAssignableFrom(typeof(T)))
-        {
-            return false;
-        }
-        return Source.Contains((T)value);
-    }
-
-    int IList.IndexOf(object? value)
-    {
-        if (value is null || !value.GetType().IsAssignableFrom(typeof(T)))
-        {
-            return -1;
-        }
-        return Source.IndexOf((T)value);
-    }
-
-    void IList.Insert(int index, object? value)
-    {
-        ThrowNotSupportedException();
-    }
-
-    void IList.Remove(object? value)
-    {
-        ThrowNotSupportedException();
-    }
-
-    void IList.RemoveAt(int index)
-    {
-        ThrowNotSupportedException();
-    }
-
-    bool IList.IsFixedSize { get; } = false;
-    bool IList.IsReadOnly { get; } = true;
-
-    object? IList.this[int index]
-    {
-        get => Source[index];
-        set
-        {
-            ThrowNotSupportedException();
-        }
-    }
-
-    void ICollection.CopyTo(Array array, int index)
-    {
-        ArgumentNullException.ThrowIfNull(array);
-
-        if (index < 0)
-            throw new ArgumentOutOfRangeException(nameof(index), "Index cannot be negative.");
-
-        if (array.Rank != 1)
-            throw new ArgumentException("Multidimensional arrays are not supported.");
-
-        if (array.Length - index < Source.Count)
-            throw new ArgumentException("The number of elements in the source collection is greater than the available space from index to the end of the destination array.");
-
-        // Проверка типа массива
-        if (array is T[] typedArray)
-        {
-            Source.CopyTo(typedArray, index);
-        }
-        else
-        {
-            // Для нетипизированных массивов копируем элементы по одному
-            Type? elementType = array.GetType().GetElementType();
-            if (elementType is null || !elementType.IsAssignableFrom(typeof(T)))
-            {
-                throw new ArgumentException("Invalid array type.");
-            }
-
-            for (int i = 0; i < Source.Count; i++)
-            {
-                array.SetValue(Source[i], index + i);
-            }
-        }
-    }
-
-    bool ICollection.IsSynchronized { get; } = false;
-    object ICollection.SyncRoot => this; 
-
-    #endregion
-
-    [DoesNotReturn]
-    private static void ThrowNotSupportedException()
-    {
-        throw new NotSupportedException("Эта коллекция только для чтения.");
     }
 
 }
