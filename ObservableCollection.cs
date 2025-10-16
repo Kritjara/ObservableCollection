@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Threading;
 
 namespace Kritjara.Collections.ObjectModel;
 
@@ -28,19 +27,30 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     }
 
     ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/> с указанной начальной ёмкостью.</summary>
+    ///<param name="capacity">Начальная ёмкость коллекции.</param>
     public ObservableCollection(int capacity)
     {
         Items = new List<T>(capacity);
     }
 
+    ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/>, содержащий скопированные элементы из указанной коллекции и с указанной начальной ёмкостью.</summary>
+    ///<param name="items">Элементы для копирования</param>
+    ///<param name="capacity">Начальная ёмкость коллекции.</param>
+    ///<remarks>Указание <paramref name="capacity"/> при создании может оказаться лишним, если <paramref name="items"/> содержит больше элементов.</remarks>
+    public ObservableCollection(IEnumerable<T> items, int capacity)
+    {
+        Items = new List<T>(capacity);
+        Items.AddRange(items);
+    }
 
-    ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/> содержащий скопированные элементы из указанной коллекции.</summary>
+    ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/>, содержащий скопированные элементы из указанной коллекции.</summary>
+    ///<param name="items">Элементы для копирования</param>
     public ObservableCollection(IEnumerable<T> items)
     {
         Items = [.. items];
     }
 
-    ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/> содержащий скопированные элементы из указанной коллекции.</summary>
+    ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/>, содержащий скопированные элементы из указанной коллекции.</summary>
     public ObservableCollection(ReadOnlySpan<T> items)
     {
         Items = [.. items];
@@ -411,9 +421,9 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
 
     private SimpleMonitor? _monitor;
     private SimpleMonitor EnsureMonitorInitialized() => _monitor ??= new SimpleMonitor(this);
-  
+
     private sealed class SimpleMonitor : IDisposable
-    {      
+    {
         internal ObservableCollection<T> _collection;
 
         public SimpleMonitor(ObservableCollection<T> collection)

@@ -102,10 +102,3 @@ public static class Extensions
     }
 
 }
-
-internal static class Helper
-{
-    public static string ErrorIsNotIListAndIsNotINotifyCollectionChanged<T>(Type type)
-        => $"Невозможно создать read-only коллекцию: {type.FullName} не реализует требуемые интерфейсы: {typeof(IList<T>)} и {typeof(INotifyCollectionChanged)}.";
-
-}
