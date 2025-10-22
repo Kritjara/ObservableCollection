@@ -18,7 +18,7 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>
     /// Список элементов.
     /// </summary>
-    protected readonly List<T> Items;
+    protected internal readonly List<T> Items;
 
     ///<summary>Инициализирует новый экземпляр класса <see cref="ObservableCollection{T}"/>.</summary>
     public ObservableCollection()
@@ -146,6 +146,12 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
         OnIndexerPropertyChanged();
         OnCollectionReset();
     }
+
+    /// <inheritdoc cref="List{T}.BinarySearch(T)"/>
+    public int BinarySearch(T item) => Items.BinarySearch(item);
+
+    /// <inheritdoc cref="List{T}.BinarySearch(T, IComparer{T})"/>
+    public int BinarySearch(T item, IComparer<T>? comparer) => Items.BinarySearch(item, comparer);
 
     /// <inheritdoc/>
     public int IndexOf(T item) => Items.IndexOf(item);
