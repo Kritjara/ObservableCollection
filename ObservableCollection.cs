@@ -4,6 +4,7 @@ using System.ComponentModel;
 
 namespace Kritjara.Collections.ObjectModel;
 
+
 /// <inheritdoc cref="IObservableCollection{T}"/>
 [System.Runtime.CompilerServices.CollectionBuilder(typeof(ObservableFactory), nameof(ObservableFactory.CreateObservableCollection))]
 public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged, IObservableCollection<T>
@@ -91,13 +92,13 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
 
 
     /// <inheritdoc/>
-    public void InsertRange(int index, IEnumerable<T> collection)
+    public virtual void InsertRange(int index, IEnumerable<T> collection)
     {
         OnAddRange(index, collection);
     }
 
     /// <inheritdoc/>
-    public void Move(int oldIndex, int newIndex)
+    public virtual void Move(int oldIndex, int newIndex)
     {
         OnMoveItem(oldIndex, newIndex);
     }
@@ -109,19 +110,19 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     }
 
     /// <inheritdoc/>
-    public void RemoveAt(int index)
+    public virtual void RemoveAt(int index)
     {
         OnRemoveAt(index);
     }
 
     /// <inheritdoc/>
-    public void RemoveRange(int index, int count)
+    public virtual void RemoveRange(int index, int count)
     {
         OnRemoveRange(index, count);
     }
 
     /// <inheritdoc/>
-    public void Clear()
+    public virtual void Clear()
     {
         OnClearItems();
     }
@@ -130,21 +131,9 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// Удаляет все элементы коллекции и добавляет указанные элементы
     /// </summary>
     /// <param name="items"></param>
-    public void Reset(IEnumerable<T> items)
+    public virtual void Reset(IEnumerable<T>? items)
     {
-        CheckReentrancy();
-
-        var newItems = items?.ToList() ?? [];
-
-        // Если коллекция пустая и добавляем пустую - ничего не делаем
-        if (Items.Count == 0 && newItems.Count == 0)
-            return;
-
-        Items.Clear();
-        Items.AddRange(newItems);
-        OnCountPropertyChanged();
-        OnIndexerPropertyChanged();
-        OnCollectionReset();
+        OnReset(items);
     }
 
     /// <inheritdoc cref="List{T}.BinarySearch(T)"/>
@@ -313,7 +302,23 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
         OnCollectionReset();
     }
 
+    /// <summary>Удаляет все элементы из коллекции и вставляет новые.</summary>
+    protected virtual void OnReset(IEnumerable<T>? items)
+    {
+        CheckReentrancy();
 
+        var newItems = items?.ToList() ?? [];
+
+        // Если коллекция пустая и добавляем пустую - ничего не делаем
+        if (Items.Count == 0 && newItems.Count == 0)
+            return;
+
+        Items.Clear();
+        Items.AddRange(newItems);
+        OnCountPropertyChanged();
+        OnIndexerPropertyChanged();
+        OnCollectionReset();
+    }
 
 
     /// <inheritdoc/>
@@ -322,8 +327,16 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>Вызывает событие <see cref="PropertyChanged"/>.</summary>
     /// <param name="e"></param>
     protected virtual void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
-    private void OnCountPropertyChanged() => OnPropertyChanged(EventArgsCache.CountPropertyChanged);
-    private void OnIndexerPropertyChanged() => OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
+
+    /// <summary>
+    /// Helper to raise PropertyChanged event with PropertyName == Count
+    /// </summary>
+    protected void OnCountPropertyChanged() => OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+
+    /// <summary>
+    /// Helper to raise PropertyChanged event with PropertyName == Items[]
+    /// </summary>
+    protected void OnIndexerPropertyChanged() => OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
 
 
     /// <inheritdoc/>
@@ -380,7 +393,7 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>
     /// Helper to raise CollectionChanged event to any listeners
     /// </summary>
-    private void OnCollectionChanged(NotifyCollectionChangedAction action, object? item, int index)
+    protected void OnCollectionChanged(NotifyCollectionChangedAction action, object? item, int index)
     {
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
     }
@@ -388,7 +401,7 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>
     /// Helper to raise CollectionChanged event to any listeners
     /// </summary>
-    private void OnCollectionChanged(NotifyCollectionChangedAction action, object? item, int index, int oldIndex)
+    protected void OnCollectionChanged(NotifyCollectionChangedAction action, object? item, int index, int oldIndex)
     {
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
     }
@@ -396,7 +409,7 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>
     /// Helper to raise CollectionChanged event to any listeners
     /// </summary>
-    private void OnCollectionChanged(NotifyCollectionChangedAction action, object? oldItem, object? newItem, int index)
+    protected void OnCollectionChanged(NotifyCollectionChangedAction action, object? oldItem, object? newItem, int index)
     {
         OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
     }
@@ -404,7 +417,7 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     /// <summary>
     /// Helper to raise CollectionChanged event with action == Reset to any listeners
     /// </summary>
-    private void OnCollectionReset() => OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
+    protected void OnCollectionReset() => OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
 
     /// <summary>
     /// Disallow reentrant attempts to change this collection. E.g. an event handler
@@ -526,11 +539,4 @@ public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectio
     object ICollection.SyncRoot => ((ICollection)Items).SyncRoot;
 
     #endregion
-}
-
-internal static class EventArgsCache
-{
-    internal static readonly PropertyChangedEventArgs CountPropertyChanged = new PropertyChangedEventArgs("Count");
-    internal static readonly PropertyChangedEventArgs IndexerPropertyChanged = new PropertyChangedEventArgs("Item[]");
-    internal static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
 }

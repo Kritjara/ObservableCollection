@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Kritjara.Collections.ObjectModel;
 
 /// <inheritdoc cref="IReadOnlyObservableCollection{T}"/>
-public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>
+public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>, IDisposable
 {
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
@@ -93,12 +93,38 @@ public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.Re
     }
 
 
-    /// <inheritdoc/>
-    public event PropertyChangedEventHandler? PropertyChanged;
 
     private void Source_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        PropertyChanged?.Invoke(this, e);
+        OnPropertyChanged(e);
+    }
+
+   
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+    
+    /// <summary>
+    /// Вызывает событие <see cref="PropertyChanged"/>
+    /// </summary>
+    /// <param name="e">Аргументы события</param>
+    protected void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
+
+    private bool isDisposed = false;
+
+    /// <inheritdoc cref="OnDispose"/>
+    public void Dispose()
+    {
+        if (isDisposed) return;
+        isDisposed = true;
+        OnDispose();
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>Удаляет подписку на событие измения коллекции источника</summary>
+    protected virtual void OnDispose()
+    {
+        ((INotifyCollectionChanged)Items).CollectionChanged -= Source_CollectionChanged;
+        ((INotifyPropertyChanged)Items).PropertyChanged -= Source_PropertyChanged;
     }
 
 }
