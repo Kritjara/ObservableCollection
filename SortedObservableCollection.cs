@@ -192,21 +192,24 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
             // Элемент меньше левого соседа — перемещаем в левую часть
             start = 0;
             end = leftNeighbor;
+            int newIndex = FindInsertPosition(item, start, end);
+            OnMoveItem(currentIndex, newIndex);
         }
         else if (rightNeighbor != -1 && comparer.Compare(item, Items[rightNeighbor]) > 0)
         {
             // Элемент больше правого соседа — перемещаем в правую часть
             start = rightNeighbor;
             end = Items.Count - 1;
+
+            // -1 потому что элемент находится левее нового индекса и перед добавлением в новую позицию он сначала будет удален
+            int newIndex = FindInsertPosition(item, start, end) - 1; 
+
+            OnMoveItem(currentIndex, newIndex);
         }
         else
         {
-            // Иначе — элемент уже на месте (между соседями), ничего не делаем
-            return;
+            // Иначе — элемент уже на месте (между соседями), ничего не делаем           
         }
-
-        int newIndex = FindInsertPosition(item, start, end);
-        OnMoveItem(currentIndex, newIndex);
     }
 
     private int FindInsertPosition(T item)
