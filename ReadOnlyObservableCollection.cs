@@ -5,9 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace Kritjara.Collections.ObjectModel;
 
 /// <inheritdoc cref="IReadOnlyObservableCollection{T}"/>
-public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>, IDisposable
+public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>
 {
-
+    
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
     public ReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source) : base(source)
@@ -89,17 +89,22 @@ public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.Re
 
     private void Source_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        OnSourceCollectionChanged(e);
         CollectionChanged?.Invoke(this, e);
     }
 
+    /// <summary>Вспомогательный метод для наследников коллекции. Вызывается прямо перед вызовом события <see cref="CollectionChanged"/></summary>
+    /// <param name="e"></param>
+    protected virtual void OnSourceCollectionChanged(NotifyCollectionChangedEventArgs e)
+    {
 
+    }
 
     private void Source_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         OnPropertyChanged(e);
     }
-
-   
+       
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
     
@@ -108,23 +113,5 @@ public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.Re
     /// </summary>
     /// <param name="e">Аргументы события</param>
     protected void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
-
-    private bool isDisposed = false;
-
-    /// <inheritdoc cref="OnDispose"/>
-    public void Dispose()
-    {
-        if (isDisposed) return;
-        isDisposed = true;
-        OnDispose();
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>Удаляет подписку на событие измения коллекции источника</summary>
-    protected virtual void OnDispose()
-    {
-        ((INotifyCollectionChanged)Items).CollectionChanged -= Source_CollectionChanged;
-        ((INotifyPropertyChanged)Items).PropertyChanged -= Source_PropertyChanged;
-    }
 
 }
