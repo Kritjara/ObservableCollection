@@ -7,7 +7,7 @@ namespace Kritjara.Collections.ObjectModel;
 
 /// <inheritdoc cref="IObservableCollection{T}"/>
 [System.Runtime.CompilerServices.CollectionBuilder(typeof(ObservableFactory), nameof(ObservableFactory.CreateObservableCollection))]
-public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged, IObservableCollection<T>
+public class ObservableCollection<T> : IList, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged, IObservableCollection<T>, IReadOnlyObservableCollection<T>
 {
     internal static ObservableCollection<T> CreateObservableCollection(ref ReadOnlySpan<T> items)
     {
