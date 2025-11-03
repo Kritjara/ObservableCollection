@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace Kritjara.Collections.ObjectModel;
@@ -33,19 +34,9 @@ public static class Extensions
             return asReadOnly;
         }
         return new ReadOnlyObservableCollection<T>(source);
+
     }
-
-    /// <summary>
-    /// Возвращает обёртку над <see cref="System.Collections.ObjectModel.ReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <returns></returns>
-    public static IReadOnlyObservableCollection<T> AsReadOnlyObservableCollection<T>(this System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source)
-    {
-        ArgumentNullException.ThrowIfNull(source);
-
-        return new ReadOnlyObservableCollection<T>(source);
-    }
-
+    
 
     /// <summary>
     /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
@@ -151,7 +142,6 @@ public static class Extensions
 
         return new SortedReadOnlyObservableCollection<T>(source, sortingStrategy);
     }
-
 
     /// <summary>
     /// Возвращает <see cref="IReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
