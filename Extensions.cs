@@ -47,85 +47,6 @@ public static class Extensions
     public static FilteredObservableCollection<T> AsFiltered<T>(this IReadOnlyObservableCollection<T> source, Predicate<T> predicate) where T : INotifyPropertyChanged
     {
         ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(predicate);
-
-        return new FilteredObservableCollection<T>(source, predicate);
-    }
-
-    /// <summary>
-    /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static FilteredObservableCollection<T> AsFiltered<T>(this IReadOnlyObservableCollection<T> source, IFilteringStrategy<T> filteringStrategy) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(filteringStrategy);
-
-        return new FilteredObservableCollection<T>(source, filteringStrategy);
-    }
-
-    /// <summary>
-    /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="predicate">Условия для фильтра элементов</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static FilteredObservableCollection<T> AsFiltered<T>(this IObservableCollection<T> source, Predicate<T> predicate) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(predicate);
-
-        return new FilteredObservableCollection<T>(source, predicate);
-    }
-
-    /// <summary>
-    /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static FilteredObservableCollection<T> AsFiltered<T>(this IObservableCollection<T> source, IFilteringStrategy<T> filteringStrategy) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(filteringStrategy);
-
-        return new FilteredObservableCollection<T>(source, filteringStrategy);
-    }
-
-
-    /// <summary>
-    /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="comparer">Компаратор для упорядочивания элементов</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static SortedReadOnlyObservableCollection<T> AsSorted<T>(this IObservableCollection<T> source, IComparer<T> comparer) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(comparer);
-
-        return new SortedReadOnlyObservableCollection<T>(source, comparer);
-    }
-
-    /// <summary>
-    /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="sortingStrategy">Стратегия сортировки элементов</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static SortedReadOnlyObservableCollection<T> AsSorted<T>(this IObservableCollection<T> source, ISortingStrategy<T> sortingStrategy) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(sortingStrategy);
-
-        return new SortedReadOnlyObservableCollection<T>(source, sortingStrategy);
-    }
-
-    /// <summary>
-    /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
-    /// </summary>
-    /// <param name="comparer">Компаратор для сортировки элементов</param>
-    /// <returns>Отфильтрованная read-only версия коллекции</returns>
-    public static SortedReadOnlyObservableCollection<T> AsSorted<T>(this IReadOnlyObservableCollection<T> source, IComparer<T> comparer) where T : INotifyPropertyChanged
-    {
-        ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(comparer);
 
         return new SortedReadOnlyObservableCollection<T>(source, comparer);
@@ -140,6 +61,60 @@ public static class Extensions
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(sortingStrategy);
+
+        return new SortedReadOnlyObservableCollection<T>(source, sortingStrategy);
+    }
+
+    extension<T>(IReadOnlyObservableCollection<T> source) where T : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="predicate">Условия фильтрации элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public FilteredObservableCollection<T> AsFiltered(Predicate<T> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(predicate);
+
+            return new FilteredObservableCollection<T>(source, predicate);
+        }
+
+        /// <summary>
+        /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public FilteredObservableCollection<T> AsFiltered(IFilteringStrategy<T> filteringStrategy)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(filteringStrategy);
+
+            return new FilteredObservableCollection<T>(source, filteringStrategy);
+        }
+
+        /// <summary>
+        /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="comparer">Компаратор для сортировки элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public SortedReadOnlyObservableCollection<T> AsSorted(IComparer<T> comparer)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(comparer);
+
+            return new SortedReadOnlyObservableCollection<T>(source, comparer);
+        }
+
+        /// <summary>
+        /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="sortingStrategy">Стратегия сортировки элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public SortedReadOnlyObservableCollection<T> AsSorted(ISortingStrategy<T> sortingStrategy)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(sortingStrategy);
 
         return new SortedReadOnlyObservableCollection<T>(source, sortingStrategy);
     }
