@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace Kritjara.Collections.ObjectModel;
@@ -28,11 +29,12 @@ public static class Extensions
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        if (source is IReadOnlyObservableCollection<T> asReadOnly)
-        {
-            return asReadOnly;
+            if (source is IReadOnlyObservableCollection<T> asReadOnly)
+            {
+                return asReadOnly;
+            }
+            return new ReadOnlyObservableCollection<T>(source);
         }
-        return new ReadOnlyObservableCollection<T>(source);
     }
 
     /// <summary>
@@ -43,7 +45,8 @@ public static class Extensions
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        return new ReadOnlyObservableCollection<T>(source);
+            return new SortedReadOnlyObservableCollection<T>(source, comparer);
+        }
     }
 
 
@@ -152,6 +155,56 @@ public static class Extensions
         return new SortedReadOnlyObservableCollection<T>(source, sortingStrategy);
     }
 
+    extension<T>(IReadOnlyObservableCollection<T> source) where T : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="predicate">Условия фильтрации элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public FilteredObservableCollection<T> AsFiltered(Predicate<T> predicate)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(predicate);
+
+            return new FilteredObservableCollection<T>(source, predicate);
+        }
+
+        /// <summary>
+        /// Возвращает отфильтрованную <see cref="FilteredObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public FilteredObservableCollection<T> AsFiltered(IFilteringStrategy<T> filteringStrategy)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(filteringStrategy);
+
+            return new FilteredObservableCollection<T>(source, filteringStrategy);
+        }
+
+        /// <summary>
+        /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="comparer">Компаратор для сортировки элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public SortedReadOnlyObservableCollection<T> AsSorted(IComparer<T> comparer)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(comparer);
+
+            return new SortedReadOnlyObservableCollection<T>(source, comparer);
+        }
+
+        /// <summary>
+        /// Возвращает отсортированную <see cref="SortedReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
+        /// </summary>
+        /// <param name="sortingStrategy">Стратегия сортировки элементов</param>
+        /// <returns>Отфильтрованная read-only версия коллекции</returns>
+        public SortedReadOnlyObservableCollection<T> AsSorted(ISortingStrategy<T> sortingStrategy)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(sortingStrategy);
 
     /// <summary>
     /// Возвращает <see cref="IReadOnlyObservableCollection{T}"/> с привязкой к источнику и сохранением уведомлений 
@@ -168,12 +221,13 @@ public static class Extensions
             return asReadOnly;
         }
 
-        if (ReadOnlyObservableCollection<T>.TryCreate(source, out var result))
-        {
-            return result;
-        }
+            if (ReadOnlyObservableCollection<T>.TryCreate(source, out var result))
+            {
+                return result;
+            }
 
-        throw new InvalidOperationException(Helper.ErrorIsNotIListAndIsNotINotifyCollectionChanged<T>(source.GetType()));
+            throw new InvalidOperationException(Helper.ErrorIsNotIListAndIsNotINotifyCollectionChanged<T>(source.GetType()));
+        }
     }
 
     /// <summary>
@@ -185,18 +239,18 @@ public static class Extensions
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        if (source is IReadOnlyObservableCollection<T> asReadOnly)
-        {
-            return asReadOnly;
-        }
-
-        if (source is IList<T> list)
-        {
-            if (ReadOnlyObservableCollection<T>.TryCreate(list, out var result))
+            if (source is IReadOnlyObservableCollection<T> asReadOnly)
             {
-                return result;
+                return asReadOnly;
             }
-        }
+
+            if (source is IList<T> list)
+            {
+                if (ReadOnlyObservableCollection<T>.TryCreate(list, out var result))
+                {
+                    return result;
+                }
+            }
 
         throw new InvalidOperationException(Helper.ErrorIsNotIListAndIsNotINotifyCollectionChanged<T>(source.GetType()));
     }
