@@ -7,6 +7,8 @@ namespace Kritjara.Collections.ObjectModel;
 /// <typeparam name="T">Тип элементов, содержащихся в коллекции.</typeparam>
 public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollection<T> where T : INotifyPropertyChanged
 {
+    private readonly NotifyCollectionChangedEventHandler OnCollectionChangedHandler;
+
     #region [ ctors ]
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -15,7 +17,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(IObservableCollection<T> source, IComparer<T> comparer) : base(new SortedObservableCollection<T>(source, comparer))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -24,7 +27,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(IObservableCollection<T> source, ISortingStrategy<T> sortingStrategy) : base(new SortedObservableCollection<T>(source, sortingStrategy))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -33,7 +37,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(IReadOnlyObservableCollection<T> source, IComparer<T> comparer) : base(new SortedObservableCollection<T>(source, comparer))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -42,7 +47,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(IReadOnlyObservableCollection<T> source, ISortingStrategy<T> sortingStrategy) : base(new SortedObservableCollection<T>(source, sortingStrategy))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -51,7 +57,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source, IComparer<T> comparer) : base(new SortedObservableCollection<T>(source, comparer))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -60,7 +67,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source, ISortingStrategy<T> sortingStrategy) : base(new SortedObservableCollection<T>(source, sortingStrategy))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -69,7 +77,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source, IComparer<T> comparer) : base(new SortedObservableCollection<T>(source, comparer))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр отсортированной коллеции только для чтения.</summary>
@@ -78,7 +87,8 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
     public SortedReadOnlyObservableCollection(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source, ISortingStrategy<T> sortingStrategy) : base(new SortedObservableCollection<T>(source, sortingStrategy))
     {
         this.source = source;
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
+        OnCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnCollectionChangedHandler);
     }
 
     #endregion
@@ -126,11 +136,5 @@ public class SortedReadOnlyObservableCollection<T> : ReadOnlyObservableCollectio
         }
       
     }
-
-
-    /// <inheritdoc/>
-    protected override void OnSourceCollectionChanged(NotifyCollectionChangedEventArgs e)
-    {
-        base.OnSourceCollectionChanged(e);
-    }
+      
 }

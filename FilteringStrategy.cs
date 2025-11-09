@@ -7,7 +7,7 @@ public sealed class FilteringStrategy<T> : IFilteringStrategy<T>
 {
     /// <summary>Инициализирует новый экземпляр класса <see cref="IFilteringStrategy{T}"/></summary>
     /// <param name="predicate">Делегат метода фильтрации элементов</param>
-    /// <param name="propertyNames">Наименования свойст элемента, изменение которых вызовет переоценку элемента</param>
+    /// <param name="propertyNames">Наименования свойств объекта, изменение которых будет вызывать переоценку видимости объекта внутри коллекции</param>
     public FilteringStrategy(Predicate<T> predicate, params string[] propertyNames)
     {
         Predicate = predicate;
@@ -27,7 +27,7 @@ public sealed class FilteringStrategy<T> : IFilteringStrategy<T>
         return PropertyNames.Count == 0 || PropertyNames.Contains(propertyName);
     }
 
-    /// <summary>Коллекция, содержащая наименования свойст элемента, изменение которых вызовет переоценку элемента.</summary>
+    /// <summary>Коллекция, содержащая наименования свойств объекта, изменение которых вызывает переоценку видимости объекта внутри коллекции.</summary>
     public ObservableCollection<string> PropertyNames { get; }
 
     private void PropertyNames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

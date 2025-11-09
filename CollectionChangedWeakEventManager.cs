@@ -1,30 +1,30 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 
 namespace Kritjara.Collections.ObjectModel;
 
 /// <summary>
-/// Слабый менеджер событий для PropertyChanged.
-/// Позволяет подписываться на события INotifyPropertyChanged без сильных ссылок.
+/// Слабый менеджер событий для CollectionChanged.
+/// Позволяет подписываться на события CollectionChanged объектов типа INotifyCollectionChanged без сильных ссылок.
 /// </summary>
-public static class PropertyChangedWeakEventManager
+public static class CollectionChangedWeakEventManager
 {
     // Таблица: источник -> список слабых ссылок на обработчики
-    private static readonly ConditionalWeakTable<INotifyPropertyChanged, List<WeakReference<PropertyChangedEventHandler>>> _handlers = [];
+    private static readonly ConditionalWeakTable<INotifyCollectionChanged, List<WeakReference<NotifyCollectionChangedEventHandler>>> _handlers = [];
 
     /// <summary>
-    /// Добавляет слабый обработчик события PropertyChanged для источника.
+    /// Добавляет слабый обработчик события CollectionChanged для источника.
     /// </summary>
-    /// <param name="source">Источник события (INotifyPropertyChanged).</param>
+    /// <param name="source">Источник события (INotifyCollectionChanged).</param>
     /// <param name="handler">Обработчик события.</param>
 
-    public static void AddHandler(INotifyPropertyChanged source, PropertyChangedEventHandler handler)
+    public static void AddHandler(INotifyCollectionChanged source, NotifyCollectionChangedEventHandler handler)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(handler);
 
         // Получаем или создаем список handlers для источника
-        List<WeakReference<PropertyChangedEventHandler>> handlers = _handlers.GetOrCreateValue(source);
+        List<WeakReference<NotifyCollectionChangedEventHandler>> handlers = _handlers.GetOrCreateValue(source);
         lock (handlers)
         {
             // Проверяем, есть ли уже этот handler (чтобы избежать дубликатов)
@@ -41,22 +41,23 @@ public static class PropertyChangedWeakEventManager
             // Если дубликата нет, добавляем новую слабую ссылку
             if (!alreadyExists)
             {
-                handlers.Add(new WeakReference<PropertyChangedEventHandler>(handler));
+                handlers.Add(new WeakReference<NotifyCollectionChangedEventHandler>(handler));
                 // Подписываемся на событие, если это первая подписка
                 if (handlers.Count == 1) // Или если это первая добавленная
                 {
-                    source.PropertyChanged += OnPropertyChanged;
+                    source.CollectionChanged += OnCollectionChanged;
                 }
             }
         }
     }
 
+
     /// <summary>
-    /// Удаляет слабый обработчик события PropertyChanged для источника.
+    /// Удаляет слабый обработчик события CollectionChanged для источника.
     /// </summary>
-    /// <param name="source">Источник события (INotifyPropertyChanged).</param>
+    /// <param name="source">Источник события (INotifyCollectionChanged).</param>
     /// <param name="handler">Обработчик события.</param>
-    public static void RemoveHandler(INotifyPropertyChanged source, PropertyChangedEventHandler handler)
+    public static void RemoveHandler(INotifyCollectionChanged source, NotifyCollectionChangedEventHandler handler)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(handler);
@@ -81,7 +82,7 @@ public static class PropertyChangedWeakEventManager
                 // Если список пуст, отписываемся от события
                 if (handlers.Count == 0)
                 {
-                    source.PropertyChanged -= OnPropertyChanged;
+                    source.CollectionChanged -= OnCollectionChanged;
                     // Можно удалить ключ из _handlers, но не обязательно (ConditionalWeakTable сам управляет)
                 }
             }
@@ -89,17 +90,17 @@ public static class PropertyChangedWeakEventManager
     }
 
     /// <summary>
-    /// Обработчик события PropertyChanged источника.
+    /// Обработчик события CollectionChanged источника.
     /// Пересылает событие всем живым слабым обработчикам.
     /// </summary>
-    private static void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private static void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        INotifyPropertyChanged source = (INotifyPropertyChanged)sender!;
+        INotifyCollectionChanged source = (INotifyCollectionChanged)sender!;
 
         if (!_handlers.TryGetValue(source, out var handlers))
             return;
 
-        List<PropertyChangedEventHandler> liveHandlers;
+        List<NotifyCollectionChangedEventHandler> liveHandlers;
         lock (handlers)
         {
             handlers.RemoveAll(wr => !wr.TryGetTarget(out _));

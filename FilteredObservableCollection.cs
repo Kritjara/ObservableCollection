@@ -30,6 +30,8 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// </summary>
     private readonly ObservableCollection<T> interim;
 
+    private readonly PropertyChangedEventHandler OnItemPropertyChangedEventHandler;
+    private readonly NotifyCollectionChangedEventHandler OnSourceCollectionChangedEventHandler;
 
     #region [ ctors ]
 
@@ -40,16 +42,18 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filter">Предикат для фильтрации элементов.</param>
     public FilteredObservableCollection(ObservableCollection<T> source, Predicate<T> filter) : base(new ObservableCollection<T>(source.Where(item => filter(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         filteringStrategy = new FilteringStrategyDefault<T>(filter);
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -60,16 +64,18 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filter">Предикат для фильтрации элементов.</param>
     public FilteredObservableCollection(IObservableCollection<T> source, Predicate<T> filter) : base(new ObservableCollection<T>(source.Where(item => filter(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         filteringStrategy = new FilteringStrategyDefault<T>(filter);
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -80,16 +86,18 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filter">Предикат для фильтрации элементов.</param>
     public FilteredObservableCollection(IReadOnlyObservableCollection<T> source, Predicate<T> filter) : base(new ObservableCollection<T>(source.Where(item => filter(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         filteringStrategy = new FilteringStrategyDefault<T>(filter);
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -100,6 +108,7 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
     public FilteredObservableCollection(ObservableCollection<T> source, IFilteringStrategy<T> filteringStrategy) : base(new ObservableCollection<T>(source.Where(item => filteringStrategy.Predicate(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         this.filteringStrategy = filteringStrategy;
         filteringStrategy.Changed += FilterContitions_Changed;
@@ -107,11 +116,12 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -122,6 +132,7 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
     public FilteredObservableCollection(IObservableCollection<T> source, IFilteringStrategy<T> filteringStrategy) : base(new ObservableCollection<T>(source.Where(item => filteringStrategy.Predicate(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         this.filteringStrategy = filteringStrategy;
         filteringStrategy.Changed += FilterContitions_Changed;
@@ -129,11 +140,12 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -144,6 +156,7 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
     /// <param name="filteringStrategy">Стратегия фильтрации элементов.</param>
     public FilteredObservableCollection(IReadOnlyObservableCollection<T> source, IFilteringStrategy<T> filteringStrategy) : base(new ObservableCollection<T>(source.Where(item => filteringStrategy.Predicate(item))))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.source = source;
         this.filteringStrategy = filteringStrategy;
         filteringStrategy.Changed += FilterContitions_Changed;
@@ -151,11 +164,12 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
         interim = [.. source];
         visible = (ObservableCollection<T>)Items; // Items из base - это visible
 
-        source.CollectionChanged += Source_CollectionChanged;
+        OnSourceCollectionChangedEventHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedEventHandler);
         interim.CollectionChanged += Interim_CollectionChanged;
         foreach (var item in interim)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -200,7 +214,7 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
             case NotifyCollectionChangedAction.Add:
 
                 T addedItem = (T)e.NewItems![0]!;
-                PropertyChangedWeakEventManager.AddHandler(addedItem, OnItemPropertyChanged);
+                PropertyChangedWeakEventManager.AddHandler(addedItem, OnItemPropertyChangedEventHandler);
                 interim.Insert(e.NewStartingIndex, addedItem);
 
                 break;
@@ -208,7 +222,7 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
             case NotifyCollectionChangedAction.Remove:
 
                 T removedItem = (T)e.OldItems![0]!;
-                PropertyChangedWeakEventManager.RemoveHandler(removedItem, OnItemPropertyChanged);
+                PropertyChangedWeakEventManager.RemoveHandler(removedItem, OnItemPropertyChangedEventHandler);
                 interim.RemoveAt(e.OldStartingIndex);
 
                 break;
@@ -216,9 +230,9 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
             case NotifyCollectionChangedAction.Replace:
 
                 T oldItem = (T)e.OldItems![0]!;
-                PropertyChangedWeakEventManager.RemoveHandler(oldItem, OnItemPropertyChanged);
+                PropertyChangedWeakEventManager.RemoveHandler(oldItem, OnItemPropertyChangedEventHandler);
                 T newItem = (T)e.NewItems![0]!;
-                PropertyChangedWeakEventManager.AddHandler(newItem, OnItemPropertyChanged);
+                PropertyChangedWeakEventManager.AddHandler(newItem, OnItemPropertyChangedEventHandler);
                 interim[e.NewStartingIndex] = newItem;
 
                 break;
@@ -233,14 +247,14 @@ public class FilteredObservableCollection<T> : ReadOnlyObservableCollection<T> w
 
                 foreach (var item in interim)
                 {
-                    PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChanged);
+                    PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChangedEventHandler);
                 }
 
                 interim.Reset(source);
 
                 foreach (var item in interim)
                 {
-                    PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+                    PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
                 }
 
                 break;

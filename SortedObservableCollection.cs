@@ -31,6 +31,8 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
         }
     }
 
+    private readonly PropertyChangedEventHandler OnItemPropertyChangedEventHandler;
+
     private void SortingStrategy_Changed(object? sender, EventArgs e)
     {
         Refresh();
@@ -43,6 +45,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="comparer">Компаратор для сортировки элементов</param>
     public SortedObservableCollection(IComparer<T> comparer) : base()
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         sortingStrategy = new SortingStrategyDefault<T>(comparer);
         sortingStrategy.Changed += SortingStrategy_Changed;
     }
@@ -51,6 +54,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="sortingStrategy">Стратегия сортировки элементов</param>
     public SortedObservableCollection(ISortingStrategy<T> sortingStrategy) : base()
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.sortingStrategy = sortingStrategy;
         sortingStrategy.Changed += SortingStrategy_Changed;
     }
@@ -60,6 +64,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="comparer">Компаратор для сортировки элементов</param>
     public SortedObservableCollection(int capacity, IComparer<T> comparer) : base(capacity)
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         sortingStrategy = new SortingStrategyDefault<T>(comparer);
         sortingStrategy.Changed += SortingStrategy_Changed;
     }
@@ -69,6 +74,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="sortingStrategy">Стратегия сортировки элементов</param>
     public SortedObservableCollection(int capacity, ISortingStrategy<T> sortingStrategy) : base(capacity)
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.sortingStrategy = sortingStrategy;
         sortingStrategy.Changed += SortingStrategy_Changed;
     }
@@ -80,11 +86,12 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<remarks>Указание <paramref name="capacity"/> при создании может оказаться лишним, если <paramref name="items"/> содержит больше элементов.</remarks>
     public SortedObservableCollection(IEnumerable<T> items, int capacity, IComparer<T> comparer) : base(items.Order(comparer), capacity)
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         sortingStrategy = new SortingStrategyDefault<T>(comparer);
         sortingStrategy.Changed += SortingStrategy_Changed;
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -95,11 +102,12 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<remarks>Указание <paramref name="capacity"/> при создании может оказаться лишним, если <paramref name="items"/> содержит больше элементов.</remarks>
     public SortedObservableCollection(IEnumerable<T> items, int capacity, ISortingStrategy<T> sortingStrategy) : base(items.Order(sortingStrategy.Comparer), capacity)
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.sortingStrategy = sortingStrategy;
         sortingStrategy.Changed += SortingStrategy_Changed;
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -108,11 +116,12 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="comparer">Компаратор для сортировки элементов</param>
     public SortedObservableCollection(IEnumerable<T> items, IComparer<T> comparer) : base(items.Order(comparer))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         sortingStrategy = new SortingStrategyDefault<T>(comparer);
         sortingStrategy.Changed += SortingStrategy_Changed;
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -121,11 +130,12 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     ///<param name="sortingStrategy">Стратегия сортировки элементов</param>
     public SortedObservableCollection(IEnumerable<T> items, ISortingStrategy<T> sortingStrategy) : base(items.Order(sortingStrategy.Comparer))
     {
+        OnItemPropertyChangedEventHandler = OnItemPropertyChanged;
         this.sortingStrategy = sortingStrategy;
         sortingStrategy.Changed += SortingStrategy_Changed;
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         }
     }
 
@@ -175,7 +185,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     /// <inheritdoc/>
     protected override void OnAdd(int index, T item)
     {
-        PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+        PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
         base.OnAdd(index, item);
     }
 
@@ -183,14 +193,14 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     protected override void OnRemoveAt(int index)
     {
         T removedItem = this[index];
-        PropertyChangedWeakEventManager.RemoveHandler(removedItem, OnItemPropertyChanged);
+        PropertyChangedWeakEventManager.RemoveHandler(removedItem, OnItemPropertyChangedEventHandler);
         base.OnRemoveAt(index);
     }
 
     /// <inheritdoc/>
     protected override bool OnRemove(T item)
     {
-        PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChanged);
+        PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChangedEventHandler);
         return base.OnRemove(item);
     }
 
@@ -205,7 +215,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     {
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChangedEventHandler);
         }
         base.OnClearItems();
     }
@@ -215,7 +225,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
     {
         foreach (var item in Items)
         {
-            PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChanged);
+            PropertyChangedWeakEventManager.RemoveHandler(item, OnItemPropertyChangedEventHandler);
         }
 
         if (items is null)
@@ -228,13 +238,15 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
             base.Reset(sortedItems);
             foreach (var item in sortedItems)
             {
-                PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChanged);
+                PropertyChangedWeakEventManager.AddHandler(item, OnItemPropertyChangedEventHandler);
             }
         }
     }
 
     private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (!sortingStrategy.IsSortAffected(e.PropertyName ?? string.Empty)) return;
+
         T item = (T)sender!;
 
         int currentIndex = Items.IndexOf(item);
@@ -252,6 +264,7 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
             // Элемент меньше левого соседа — перемещаем в левую часть
             start = 0;
             end = leftNeighbor;
+
             int newIndex = FindInsertPosition(item, start, end);
             OnMoveItem(currentIndex, newIndex);
         }
@@ -263,17 +276,18 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
 
             // -1 потому что элемент находится левее нового индекса и перед добавлением в новую позицию он сначала будет удален
             int newIndex = FindInsertPosition(item, start, end) - 1;
-
             OnMoveItem(currentIndex, newIndex);
         }
-        else
-        {
-            // Иначе — элемент уже на месте (между соседями), ничего не делаем           
-        }
+        // Иначе — элемент уже на месте (между соседями), ничего не делаем    
     }
 
     private int FindInsertPosition(T item)
     {
+        var result = Items.BinarySearch(item, sortingStrategy.Comparer);
+        if (result < 0)
+        {
+            return -(result + 1);
+        }
         return FindInsertPosition(item, 0, Items.Count - 1);
     }
 
@@ -286,17 +300,14 @@ public class SortedObservableCollection<T> : ObservableCollection<T> where T : I
 
             if (comparison == 0)
             {
-                // Элемент равен — вставляем после (для стабильности дубликатов)
                 return mid + 1;
             }
             else if (comparison < 0)
-            {
-                // Ищем в левой половине
+            {   // переключаемся на левую половину
                 end = mid - 1;
             }
             else
-            {
-                // Ищем в правой половине
+            {   // переключаемся на правую половину
                 start = mid + 1;
             }
         }

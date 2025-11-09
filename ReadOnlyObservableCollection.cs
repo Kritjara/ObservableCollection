@@ -7,37 +7,48 @@ namespace Kritjara.Collections.ObjectModel;
 /// <inheritdoc cref="IReadOnlyObservableCollection{T}"/>
 public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.ReadOnlyCollection<T>, IReadOnlyObservableCollection<T>
 {
-    
+
+    private readonly NotifyCollectionChangedEventHandler OnSourceCollectionChangedHandler;
+    private readonly PropertyChangedEventHandler OnSourcePropertyChangedHandler;
+
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
     public ReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> source) : base(source)
     {
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
-        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
+        OnSourceCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedHandler);
+        OnSourcePropertyChangedHandler = Source_PropertyChanged;
+        PropertyChangedWeakEventManager.AddHandler(source, OnSourcePropertyChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
     public ReadOnlyObservableCollection(IObservableCollection<T> source) : base(source)
     {
-        source.CollectionChanged += Source_CollectionChanged;
-        source.PropertyChanged += Source_PropertyChanged;
+        OnSourceCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedHandler);
+        OnSourcePropertyChangedHandler = Source_PropertyChanged;
+        PropertyChangedWeakEventManager.AddHandler(source, OnSourcePropertyChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
     public ReadOnlyObservableCollection(System.Collections.ObjectModel.ReadOnlyObservableCollection<T> source) : base(source)
     {
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
-        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
+        OnSourceCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler(source, OnSourceCollectionChangedHandler);
+        OnSourcePropertyChangedHandler = Source_PropertyChanged;
+        PropertyChangedWeakEventManager.AddHandler(source, OnSourcePropertyChangedHandler);
     }
 
     /// <summary>Создаёт новый экземпляр коллеции только для чтения.</summary>
     /// <param name="source">Основной источник элементов.</param>
     private ReadOnlyObservableCollection(IList<T> source) : base(source)
     {
-        ((INotifyCollectionChanged)source).CollectionChanged += Source_CollectionChanged;
-        ((INotifyPropertyChanged)source).PropertyChanged += Source_PropertyChanged;
+        OnSourceCollectionChangedHandler = Source_CollectionChanged;
+        CollectionChangedWeakEventManager.AddHandler((INotifyCollectionChanged)source, OnSourceCollectionChangedHandler);
+        OnSourcePropertyChangedHandler = Source_PropertyChanged;
+        PropertyChangedWeakEventManager.AddHandler((INotifyPropertyChanged)source, OnSourcePropertyChangedHandler);
     }
 
     /// <summary>Пытается создать коллекцию только для чтения из объекта типа <see cref="INotifyCollectionChanged"/></summary>
@@ -104,14 +115,14 @@ public class ReadOnlyObservableCollection<T> : System.Collections.ObjectModel.Re
     {
         OnPropertyChanged(e);
     }
-       
+
     /// <inheritdoc/>
     public event PropertyChangedEventHandler? PropertyChanged;
-    
+
     /// <summary>
     /// Вызывает событие <see cref="PropertyChanged"/>
     /// </summary>
     /// <param name="e">Аргументы события</param>
     protected void OnPropertyChanged(PropertyChangedEventArgs e) => PropertyChanged?.Invoke(this, e);
-
+     
 }
